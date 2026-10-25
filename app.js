@@ -62,7 +62,7 @@ function updateField(){
   try {
     const r=JIField.compute({
       distance:Number(raw),
-      height:read('field-height').trim()?Number(read('field-height')):0,
+      height:read('field-height-direction')==='flat'?0:(read('field-height-direction')==='down'?-1:1)*(read('field-height').trim()?Number(read('field-height')):0),
       club:read('field-club'),wind:read('field-wind'),
       windSpeed:read('field-wind-speed').trim()?Number(read('field-wind-speed')):0,
       lie,penalty
