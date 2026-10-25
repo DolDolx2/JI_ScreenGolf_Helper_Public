@@ -1,6 +1,6 @@
 'use strict';
 // Version bump changes the static shell cache on the next online visit.
-const CACHE='ji-golf-shell-v2-height-direction-20261025';
+const CACHE='ji-golf-shell-v3-putting-height-m-20261025';
 const CORE=['./','./index.html','./styles.css','./app.js',
   './putting-engine.js','./field-engine.js','./settings-engine.js',
   './club-engine.js','./putting-mat.js','./manifest.webmanifest','./icons/app.svg'];
