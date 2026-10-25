@@ -167,7 +167,12 @@ function updatePutting(){
     outputs[2].textContent=result.breakSide==='none'?'보정 없음':side+' '+result.aimOffsetCm.toFixed(1)+' cm';
     outputs[3].textContent=result.lateralCm.toFixed(1)+' cm';
     updateMatGuide(result.aimOffsetCm,result.breakSide);
-    status.textContent=result.ballSpeedExtrapolated?'볼스피드는 참고 실측표 범위 밖 외삽 추정치입니다. 실제 측정값으로 검증이 필요합니다.':'참고 경험식에 따른 예상 결과입니다.';
+    const downhillNotice=result.downhillWarning==='extreme'
+      ?'매우 급한 내리막: 공을 살짝 건드려도 굴러갈 수 있습니다. 0.5m는 최소 표시값이며 실제 권장 타격거리가 아닙니다.'
+      :result.downhillWarning==='steep'
+      ?'급경사 주의: 매우 약한 퍼팅이 필요할 수 있습니다. 0.5m는 최소 표시값입니다.':'';
+    const speedNotice=result.ballSpeedExtrapolated?' 볼스피드는 참고표 범위 밖 외삽 추정치로 검증이 필요합니다.':'';
+    status.textContent=downhillNotice?downhillNotice+speedNotice:(speedNotice.trim()||'참고 경험식에 따른 예상 결과입니다.');
   }catch(e){outputs.forEach(el=>el.textContent='확인 필요');status.textContent=e.message;updateMatGuide(null,'none');}
 }
 document.querySelectorAll('#putting-inputs input,#putting-inputs select').forEach(el=>{
