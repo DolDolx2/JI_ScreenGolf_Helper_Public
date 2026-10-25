@@ -158,7 +158,7 @@ function updatePutting(){
   try{
     const result=JIPutting.compute({
       distance:Number(distanceText),speed:Number(value('green-speed')),
-      slope:value('putting-slope'),heightCm:value('putting-height').trim()?Number(value('putting-height')):0,
+      slope:value('putting-slope'),heightCm:value('putting-height').trim()?Number(value('putting-height'))*100:0,
       breakSide:value('putting-break-side'),breakCups:value('putting-break-cups').trim()?Number(value('putting-break-cups')):0
     });
     const side=result.breakSide==='none'?'없음':result.breakSide==='right'?'오른쪽':'왼쪽';
