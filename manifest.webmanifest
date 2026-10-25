@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "JI 스크린골프 도우미",
+  "short_name": "JI 골프 도우미",
+  "description": "퍼팅·필드 공략 계산과 개인 클럽 비거리",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8faf8",
+  "theme_color": "#103f28",
+  "icons": [
+    {
+      "src": "./icons/app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
