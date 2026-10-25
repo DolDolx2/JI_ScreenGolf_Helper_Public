@@ -9,12 +9,14 @@
   function compute({distance,speed,slope='flat',heightCm=0,breakSide='none',breakCups=0}){
     for(const n of [distance,speed,heightCm,breakCups]) if(!Number.isFinite(n)) throw new RangeError('유효한 수치를 입력하세요.');
     if(distance<=0||distance>1000||![2.4,2.6,2.8,3.1].includes(speed)||heightCm<0||heightCm>1000||breakCups<0||breakCups>100||!['up','down','flat'].includes(slope)||!['left','right','none'].includes(breakSide)) throw new RangeError('입력 범위를 확인하세요.');
-    const normalized=distance*2.6/speed;
-    const slopeAdjustment=slope==='up'?20*(heightCm/100)*(speed/2.6):slope==='down'?-15*(heightCm/100)*(speed/2.6):0;
-    const adjustedDistance=Math.max(0.5,normalized+slopeAdjustment);
+    // First correct physical slope at reference speed, then scale the entire distance.
+    const referenceDistance=distance+(slope==='up'?20*(heightCm/100):slope==='down'?-15*(heightCm/100):0);
+    const unboundedDistance=referenceDistance*2.6/speed;
+    const adjustedDistance=Math.max(0.5,unboundedDistance);
+    const downhillWarning=slope!=='down'||unboundedDistance>0.5?'none':unboundedDistance<=0?'extreme':'steep';
     const speedEstimate=interpolate(adjustedDistance);
     const effectiveCups=breakSide==='none'?0:breakCups;
-    return {adjustedDistance,ballSpeed:speedEstimate.value,ballSpeedExtrapolated:speedEstimate.extrapolated,aimOffsetCm:effectiveCups*5/distance,lateralCm:effectiveCups*10.8,breakSide:effectiveCups===0?'none':breakSide};
+    return {adjustedDistance,ballSpeed:speedEstimate.value,ballSpeedExtrapolated:speedEstimate.extrapolated,downhillWarning,aimOffsetCm:effectiveCups*5/distance,lateralCm:effectiveCups*10.8,breakSide:effectiveCups===0?'none':breakSide};
   }
   function interpolate(distance){
     let i=0;
