@@ -1,6 +1,6 @@
 'use strict';
 // Version bump changes the static shell cache on the next online visit.
-const CACHE='ji-golf-shell-v2-20261123';
+const CACHE='ji-golf-shell-v2-aim-fix-20261123';
 const CORE=['./','./index.html','./styles.css','./app.js',
   './intro.js','./field-engine.js','./settings-engine.js',
   './club-engine.js','./putting-calculator/index.html','./manifest.webmanifest','./icons/app.svg'];
