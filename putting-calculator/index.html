@@ -543,11 +543,11 @@ html.embedded .container{padding-top:18px}
     const flowHeader = document.getElementById('flowHeader');
     const matsWrap = document.getElementById('matsWrap');
     const isLeft = dir === 'left';
+    const count = Math.max(1, Math.ceil(ratioPercent / 100));
     flowHeader.innerHTML = isLeft
       ? '<span>좌측 조준</span><span class="flow-arrow">◀◀◀ 조준 방향</span><span>매트 우측</span>'
       : '<span>매트 좌측</span><span class="flow-arrow">조준 방향 ▶▶▶</span><span>우측 조준</span>';
     matsWrap.replaceChildren();
-    const count = Math.max(1, Math.ceil(ratioPercent / 100));
     for(let i=0;i<count;i++){
       const start=i*100,end=(i+1)*100;
       const section=document.createElement('div');
@@ -563,14 +563,20 @@ html.embedded .container{padding-top:18px}
         const pos=ratioPercent-start;
         const marker=document.createElement('div');
         marker.className='ball-marker'+(ratioPercent>100?' over':'');
-        // Aim direction is a physical side of the mat, not the reversed progress axis.
-        // LEFT: 19.4% from the left edge; RIGHT: 19.4% from the right edge.
-        marker.style.left='clamp(12px, '+(isLeft?pos:100-pos)+'%, calc(100% - 12px))';
+        // Keep the approved single-mat layout unchanged.
+        // With multiple mats, measure the remainder in the direction of travel:
+        // LEFT aims right-to-left (33.3% => right third);
+        // RIGHT aims left-to-right (33.3% => left third).
+        const horizontalPercent = count === 1
+          ? (isLeft ? pos : 100 - pos)
+          : (isLeft ? 100 - pos : pos);
+        marker.style.left='clamp(12px, '+horizontalPercent+'%, calc(100% - 12px))';
         mat.append(marker);
       }
       section.append(mat);
       const ticks=document.createElement('div');ticks.className='mat-ticks';
-      ticks.innerHTML=(isLeft?[start,start+25,start+50,start+75,end]:[end,start+75,start+50,start+25,start]).map(v=>'<span>'+v+'%</span>').join('');
+      const reverseAxis = count === 1 ? !isLeft : isLeft;
+      ticks.innerHTML=(reverseAxis?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
       section.append(ticks);matsWrap.append(section);
     }
   }
