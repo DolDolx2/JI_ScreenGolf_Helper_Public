@@ -334,7 +334,13 @@
       font-weight: 700;
       display: none;
     }
-  .preset-grid {grid-template-columns:repeat(5,minmax(0,1fr));} .preset-grid .toggle-btn {min-height:44px;overflow-wrap:anywhere;font-size:.76rem;padding:8px 3px;} .mat-segment {min-width:0;} .mat-label {display:flex;justify-content:space-between;font-size:.77rem;color:#d1fae5;margin:0 0 5px;} .mat-label strong {color:#4ade80;} .mat-ticks {display:flex;justify-content:space-between;color:#94a3b8;font-size:.71rem;margin-top:5px;} .turf-mat {margin-inline:10px;} button:focus-visible,input:focus-visible {outline:2px solid var(--accent);outline-offset:2px;} @media(max-width:390px){body{padding:8px}.container{padding:16px 12px}.preset-grid{grid-template-columns:repeat(3,minmax(0,1fr)}} @media(prefers-reduced-motion:reduce){.ball-marker{transition:none}} </style>
+  .preset-grid {grid-template-columns:repeat(5,minmax(0,1fr));} .preset-grid .toggle-btn {min-height:44px;overflow-wrap:anywhere;font-size:.76rem;padding:8px 3px;} .mat-segment {min-width:0;} .mat-label {display:flex;justify-content:space-between;font-size:.77rem;color:#d1fae5;margin:0 0 5px;} .mat-label strong {color:#4ade80;} .mat-ticks {display:flex;justify-content:space-between;color:#94a3b8;font-size:.71rem;margin-top:5px;} .turf-mat {margin-inline:10px;} button:focus-visible,input:focus-visible {outline:2px solid var(--accent);outline-offset:2px;} @media(max-width:390px){body{padding:8px}.container{padding:16px 12px}.preset-grid{grid-template-columns:repeat(3,minmax(0,1fr)}} @media(prefers-reduced-motion:reduce){.ball-marker{transition:none}} 
+html.embedded,html.embedded body{height:auto;min-height:0}
+html.embedded body{padding:0;background:transparent;display:block}
+html.embedded .container{max-width:none;width:100%;margin:0;border-radius:16px;box-shadow:none}
+html.embedded header{display:none}
+html.embedded .container{padding-top:18px}
+</style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 </head>
 <body>
@@ -644,6 +650,15 @@
   }
 
   calculate();
+
+// Embedded in the main V2 app; report height to avoid nested scrolling.
+if(new URLSearchParams(location.search).has('embedded')){
+  document.documentElement.classList.add('embedded');
+  const reportSize=()=>parent.postMessage({type:'ji-putting-size',height:Math.ceil(document.documentElement.scrollHeight)},location.origin);
+  if(typeof ResizeObserver!=='undefined')new ResizeObserver(reportSize).observe(document.body);
+  addEventListener('load',reportSize);
+  requestAnimationFrame(reportSize);
+}
 </script>
 </body>
 </html>

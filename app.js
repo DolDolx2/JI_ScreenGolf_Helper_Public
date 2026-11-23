@@ -68,7 +68,7 @@ function updateField(){
       lie,penalty
     });
     resultEl.textContent=formatDistance(r.finalDistance)+' m';
-    recommendationEl.textContent=renderRecommendation(JIClub.recommend(r.finalDistance,settings.clubs));
+    recommendationEl.textContent=renderRecommendation(JIClub.recommend(r.finalDistance,settings.clubs,settings.customClubs));
     formulaEl.textContent='높낮이: '+formatDistance(r.distance)+'m '+(r.slopeChange<0?'−':'+')+' '+formatDistance(Math.abs(r.slopeChange))+
       'm → '+formatDistance(r.slopeDistance)+'m | 바람: '+(r.windChange<0?'−':'+')+
       formatDistance(Math.abs(r.windChange))+'m → '+formatDistance(r.prePenalty)+'m | 라이: '+
@@ -97,86 +97,79 @@ for(const input of document.querySelectorAll('[data-penalty]')){
     updateField();
   });
 }
-for(const row of document.querySelectorAll('[data-club]')){
-  const key=row.dataset.club;
-  const minInput=row.querySelector('[data-bound="min"]');
-  const maxInput=row.querySelector('[data-bound="max"]');
-  const saved=settings.clubs[key];
-  if(saved){minInput.value=String(saved.min);maxInput.value=String(saved.max);}
-  const changed=()=>{
-    const status=document.getElementById('club-status');
-    const emptyMin=minInput.value.trim()==='';
-    const emptyMax=maxInput.value.trim()==='';
-    if(emptyMin&&emptyMax){
-      JISettings.setClub(settings,key,null,null);
-      status.textContent=saveSettings()?'미등록 상태로 저장했습니다.':'브라우저 저장에 실패했습니다.';
-      updateField();
-      return;
+// Render built-in and user-added clubs from the same validated settings model.
+const clubRows=document.getElementById('club-rows');
+const clubStatus=document.getElementById('club-status');
+function makeClubRow(key,name,isCustom){
+  const row=document.createElement('div');row.className='club-row';row.dataset.club=key;
+  const heading=document.createElement('span');heading.className='club-name';heading.textContent=name;row.append(heading);
+  const boundInput=bound=>{
+    const input=document.createElement('input');
+    input.type='number';input.min='0';input.max='1000';input.step='0.1';input.inputMode='decimal';
+    input.placeholder=bound==='min'?'최소':'최대';input.dataset.bound=bound;
+    input.setAttribute('aria-label',name+' '+(bound==='min'?'최소':'최대')+' 거리');
+    if(settings.clubs[key])input.value=String(settings.clubs[key][bound]);
+    return input;
+  };
+  const minimum=boundInput('min'),maximum=boundInput('max');
+  row.append(minimum,maximum);
+  const persist=()=>{
+    const emptyMin=minimum.value.trim()==='',emptyMax=maximum.value.trim()==='';
+    if(emptyMin&&emptyMax){JISettings.setClub(settings,key,null,null);clubStatus.textContent=saveSettings()?'미등록으로 저장했습니다.':'저장할 수 없습니다.';updateField();return;}
+    if(emptyMin||emptyMax||!JISettings.setClub(settings,key,Number(minimum.value),Number(maximum.value))){
+      clubStatus.textContent='최소·최대를 모두 입력하세요 (0~1000m, 최소 ≤ 최대). 기존 저장값은 유지됩니다.';return;
     }
-    if(emptyMin||emptyMax||!JISettings.setClub(settings,key,Number(minInput.value),Number(maxInput.value))){
-      status.textContent='최소·최대 거리를 모두 입력하세요(0~1,000m, 최소 ≤ 최대). 기존 유효값은 보존됩니다.';
-      return;
-    }
-    status.textContent=saveSettings()?'클럽 거리 저장 완료':'브라우저 저장에 실패했습니다.';
+    clubStatus.textContent=saveSettings()?'클럽 비거리 저장 완료':'브라우저 저장에 실패했습니다.';
     updateField();
   };
-  minInput.addEventListener('change',changed);
-  maxInput.addEventListener('change',changed);
+  minimum.addEventListener('change',persist);
+  maximum.addEventListener('change',persist);
+  if(isCustom){
+    const remove=document.createElement('button');remove.type='button';remove.className='club-remove';
+    remove.textContent='삭제';remove.setAttribute('aria-label',name+' 삭제');
+    remove.addEventListener('click',()=>{
+      if(!window.confirm(name+' 클럽과 저장된 비거리를 삭제하시겠습니까?'))return;
+      JISettings.removeCustomClub(settings,key);
+      clubStatus.textContent=saveSettings()?'클럽 삭제 완료':'브라우저 저장에 실패했습니다.';
+      renderClubs();updateField();
+    });
+    row.append(remove);
+  }
+  return row;
 }
+function renderClubs(){
+  clubRows.replaceChildren();
+  for(const [key,name] of Object.entries(JIClub.NAMES))clubRows.append(makeClubRow(key,name,false));
+  for(const club of settings.customClubs)clubRows.append(makeClubRow(club.id,club.name,true));
+}
+function newClubId(){
+  const rand=typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+  return 'custom-'+rand;
+}
+function addClub(){
+  const input=document.getElementById('custom-club-name'),name=input.value.trim();
+  if(Object.values(JIClub.NAMES).includes(name)){
+    clubStatus.textContent='기본 목록에 이미 있는 클럽입니다.';return;
+  }
+  if(!JISettings.addCustomClub(settings,name,newClubId())){
+    clubStatus.textContent='이름은 1~32자, 중복 없이 입력하세요. 사용자 클럽은 최대 30개입니다.';return;
+  }
+  const ok=saveSettings();
+  clubStatus.textContent=ok?'새 클럽을 추가했습니다. 최소·최대 비거리를 입력하세요.':'클럽을 저장하지 못했습니다.';
+  input.value='';renderClubs();updateField();
+}
+document.getElementById('add-club-btn').addEventListener('click',addClub);
+document.getElementById('custom-club-name').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addClub();}});
+renderClubs();
+window.addEventListener('message',event=>{
+  const frame=document.getElementById('putting-frame');
+  if(event.origin!==location.origin||event.source!==frame.contentWindow||event.data?.type!=='ji-putting-size')return;
+  const height=Number(event.data.height);
+  if(Number.isFinite(height)&&height>=200&&height<=15000)frame.style.height=Math.ceil(height)+'px';
+});
 document.querySelectorAll('#panel-field input,#panel-field select').forEach(el=>{
   el.addEventListener('input',updateField);
   el.addEventListener('change',updateField);
 });
 updateField();
 
-function updateMatGuide(offsetCm,direction){
-  const text=document.getElementById('mat-guide-text');
-  const desc=document.getElementById('mat-desc');
-  const ball=document.getElementById('mat-ball');
-  const line=document.getElementById('mat-aim-line');
-  if(offsetCm===null){
-    ball.setAttribute('cx','175');line.setAttribute('x1','175');
-    text.textContent='퍼팅 거리를 입력하면 공의 시작 위치를 표시합니다.';
-    desc.textContent=text.textContent;
-    return;
-  }
-  const p=JIMat.layout({offsetCm,direction});
-  ball.setAttribute('cx',String(p.ballX));
-  line.setAttribute('x1',String(p.ballX));
-  const side=direction==='right'?'우측':direction==='left'?'좌측':'중앙';
-  text.textContent=p.outside
-    ?side+' '+offsetCm.toFixed(1)+'cm: 공이 매트 표시 범위를 벗어납니다. 정확한 거리는 수치로 확인하세요.'
-    :side+' '+offsetCm.toFixed(1)+'cm · '+p.lanes.toFixed(2)+'칸 · 고정 경계선 방향으로 조준';
-  desc.textContent='기준 경계선 x=175, 공 중심 x='+p.ballX.toFixed(1)+'. '+text.textContent;
-}
-function updatePutting(){
-  const value=id=>document.getElementById(id).value;
-  const distanceText=value('putting-distance');
-  const outputs=['putting-result-distance','putting-result-speed','putting-result-aim','putting-result-lateral'].map(id=>document.getElementById(id));
-  const status=document.getElementById('putting-status');
-  if(!distanceText.trim()){outputs.forEach(el=>el.textContent='입력 대기');status.textContent='남은 거리를 입력하면 자동 계산합니다.';updateMatGuide(null,'none');return;}
-  try{
-    const result=JIPutting.compute({
-      distance:Number(distanceText),speed:Number(value('green-speed')),
-      slope:value('putting-slope'),heightCm:value('putting-height').trim()?Number(value('putting-height'))*100:0,
-      breakSide:value('putting-break-side'),breakCups:value('putting-break-cups').trim()?Number(value('putting-break-cups')):0
-    });
-    const side=result.breakSide==='none'?'없음':result.breakSide==='right'?'오른쪽':'왼쪽';
-    outputs[0].textContent=result.adjustedDistance.toFixed(1)+' m';
-    outputs[1].textContent=result.ballSpeed.toFixed(2)+' m/s';
-    outputs[2].textContent=result.breakSide==='none'?'보정 없음':side+' '+result.aimOffsetCm.toFixed(1)+' cm';
-    outputs[3].textContent=result.lateralCm.toFixed(1)+' cm';
-    updateMatGuide(result.aimOffsetCm,result.breakSide);
-    const downhillNotice=result.downhillWarning==='extreme'
-      ?'매우 급한 내리막: 공을 살짝 건드려도 굴러갈 수 있습니다. 0.5m는 최소 표시값이며 실제 권장 타격거리가 아닙니다.'
-      :result.downhillWarning==='steep'
-      ?'급경사 주의: 매우 약한 퍼팅이 필요할 수 있습니다. 0.5m는 최소 표시값입니다.':'';
-    const speedNotice=result.ballSpeedExtrapolated?' 볼스피드는 참고표 범위 밖 외삽 추정치로 검증이 필요합니다.':'';
-    status.textContent=downhillNotice?downhillNotice+speedNotice:(speedNotice.trim()||'참고 경험식에 따른 예상 결과입니다.');
-  }catch(e){outputs.forEach(el=>el.textContent='확인 필요');status.textContent=e.message;updateMatGuide(null,'none');}
-}
-document.querySelectorAll('#putting-inputs input,#putting-inputs select').forEach(el=>{
-  el.addEventListener('input',updatePutting);
-  el.addEventListener('change',updatePutting);
-});
-updatePutting();
