@@ -16,3 +16,10 @@ https://doldolx2.github.io/JI_ScreenGolf_Helper_Public/
 `node --test tests/v2-clubs.test.cjs`
 
 계산식은 개인 참고용 경험식이며 게임사의 공식 공식이 아닙니다.
+
+## 버전 및 캐시 정책
+- 앱 버전은 **V2.0**으로 고정하고, 수정 배포마다 **Build YYYYMMDD.NN**을 1씩 증가시킵니다. 현재 Build **20261123.01**.
+- 빌드 변경 시 `index.html`의 화면 표시 빌드 번호와 모든 로컬 자원 URL의 `?build=` 값을 함께 올려야 합니다. 동시에 `sw.js` 주석의 빌드 번호도 변경합니다.
+- 접속 시 `ji-golf-shell-` 접두어의 기존 앱 캐시만 삭제합니다. 서비스 워커는 앱 리소스를 **network-only / no-store** 방식으로 가져오며 새 캐시를 만들지 않습니다.
+- 개인 클럽 및 페널티는 `localStorage`의 `ji-screen-settings-v1`에 보존되며 캐시 정리로 지워지지 않습니다.
+- **주의:** 오프라인 실행은 더 이상 보장하지 않습니다. 네트워크가 끊어지면 앱을 새로 열 수 없을 수 있습니다.
