@@ -544,8 +544,8 @@ html.embedded .container{padding-top:18px}
     const matsWrap = document.getElementById('matsWrap');
     const isLeft = dir === 'left';
     flowHeader.innerHTML = isLeft
-      ? '<span>매트 끝</span><span class="flow-arrow">◀◀◀ 진행 방향 (우 → 좌)</span><span>공 출발</span>'
-      : '<span>공 출발</span><span class="flow-arrow">진행 방향 (좌 → 우) ▶▶▶</span><span>매트 끝</span>';
+      ? '<span>좌측 조준</span><span class="flow-arrow">◀◀◀ 조준 방향</span><span>매트 우측</span>'
+      : '<span>매트 좌측</span><span class="flow-arrow">조준 방향 ▶▶▶</span><span>우측 조준</span>';
     matsWrap.replaceChildren();
     const count = Math.max(1, Math.ceil(ratioPercent / 100));
     for(let i=0;i<count;i++){
@@ -563,12 +563,14 @@ html.embedded .container{padding-top:18px}
         const pos=ratioPercent-start;
         const marker=document.createElement('div');
         marker.className='ball-marker'+(ratioPercent>100?' over':'');
-        marker.style.left='clamp(12px, '+(isLeft?100-pos:pos)+'%, calc(100% - 12px))';
+        // Aim direction is a physical side of the mat, not the reversed progress axis.
+        // LEFT: 19.4% from the left edge; RIGHT: 19.4% from the right edge.
+        marker.style.left='clamp(12px, '+(isLeft?pos:100-pos)+'%, calc(100% - 12px))';
         mat.append(marker);
       }
       section.append(mat);
       const ticks=document.createElement('div');ticks.className='mat-ticks';
-      ticks.innerHTML=(isLeft?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
+      ticks.innerHTML=(isLeft?[start,start+25,start+50,start+75,end]:[end,start+75,start+50,start+25,start]).map(v=>'<span>'+v+'%</span>').join('');
       section.append(ticks);matsWrap.append(section);
     }
   }
