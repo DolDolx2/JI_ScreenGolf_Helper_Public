@@ -16,5 +16,5 @@ self.addEventListener('activate',event=>{
 self.addEventListener('fetch',event=>{
  const req=event.request;
  if(req.method!=='GET'||new URL(req.url).origin!==self.location.origin)return;
- event.respondWith(fetch(req).then(response=>{if(response.ok&&req.url.startsWith(self.registration.scope))caches.open(CACHE).then(cache=>cache.put(req,response.clone()));return response;}).catch(()=>caches.match(req)));
+ event.respondWith(fetch(req).then(response=>{if(response.ok&&req.url.startsWith(self.registration.scope)){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(req,copy)).catch(()=>{});}return response;}).catch(()=>caches.match(req)));
 });
