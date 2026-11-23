@@ -340,7 +340,8 @@ html.embedded body{padding:0;background:transparent;display:block}
 html.embedded .container{max-width:none;width:100%;margin:0;border-radius:16px;box-shadow:none}
 html.embedded header{display:none}
 html.embedded .container{padding-top:18px}
-</style>
+    .mat-build-label{font-size:11px;color:#94a3b8;text-align:right;margin-top:9px;letter-spacing:.02em}
+  </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 </head>
 <body>
@@ -440,6 +441,7 @@ html.embedded .container{padding-top:18px}
     </div>
 
     <div class="mats-wrap" id="matsWrap"></div>
+    <p class="mat-build-label" aria-label="퍼팅 표시 빌드 번호">퍼팅 화면 Build 20261123.06</p>
 
     <div class="warning-text" id="overWarning" role="status" aria-live="polite"></div>
   </div>
@@ -548,42 +550,45 @@ html.embedded .container{padding-top:18px}
       ? '<span>좌측 조준</span><span class="flow-arrow">◀◀◀ 조준 방향</span><span>매트 우측</span>'
       : '<span>매트 좌측</span><span class="flow-arrow">조준 방향 ▶▶▶</span><span>우측 조준</span>';
     matsWrap.replaceChildren();
-    for(let i=0;i<count;i++){
-      const start=i*100,end=(i+1)*100;
-      const section=document.createElement('div');
-      section.className='mat-segment';
-      const label=document.createElement('div');
-      label.className='mat-label';
-      label.innerHTML='<strong>'+(i+1)+'번째 매트</strong><span>'+start+'% ~ '+end+'%</span>';
-      section.append(label);
-      const mat=document.createElement('div');
-      mat.className='turf-mat';
-      mat.innerHTML='<div class="turf-aim-line"></div><div class="turf-grid"><span></span><span></span><span></span><span></span></div>';
-      if(ratioPercent>0&&ratioPercent>start&&ratioPercent<=end){
-        const pos=ratioPercent-start;
-        const marker=document.createElement('div');
-        marker.className='ball-marker'+(ratioPercent>100?' over':'');
-        // Physical aiming side always determines the marker's edge:
-        // LEFT 119.6% => mat 2, 19.6% in from the left edge.
-        // RIGHT 119.6% => mat 2, 19.6% in from the right edge.
-        // Only the visual mat stacking order reverses for multi-mat RIGHT aims.
-        const horizontalPercent = isLeft ? pos : 100 - pos;
-        marker.style.left='clamp(12px, '+horizontalPercent+'%, calc(100% - 12px))';
+    for (let i = 0; i < count; i++) {
+      const start = i * 100;
+      const end = start + 100;
+      const segment = document.createElement('div');
+      segment.className = 'mat-segment';
+      segment.dataset.matNumber = String(i + 1);
+      const label = document.createElement('div');
+      label.className = 'mat-label';
+      label.innerHTML = '<strong>' + (i + 1) + '번째 매트</strong><span>' + start + '% ~ ' + end + '%</span>';
+      segment.append(label);
+
+      const mat = document.createElement('div');
+      mat.className = 'turf-mat';
+      mat.innerHTML = '<div class="turf-aim-line"></div><div class="turf-grid"><span></span><span></span><span></span><span></span></div>';
+
+      // Marker and tick labels are based on the SAME monotonically increasing
+      // absolute axis. LEFT 120.9%: mat 2, LEFT EDGE 100%, marker 20.9%,
+      // RIGHT EDGE 200%. RIGHT 120.9%: reversed within the same mat.
+      const tickValues = isLeft
+        ? [start, start + 25, start + 50, start + 75, end]
+        : [end, start + 75, start + 50, start + 25, start];
+      if (ratioPercent > start && ratioPercent <= end) {
+        const localPercent = ratioPercent - start;
+        const horizontalPercent = isLeft ? localPercent : 100 - localPercent;
+        const marker = document.createElement('div');
+        marker.className = 'ball-marker' + (ratioPercent > 100 ? ' over' : '');
+        marker.style.left = 'clamp(12px, ' + horizontalPercent + '%, calc(100% - 12px))';
+        marker.dataset.absolutePercent = String(ratioPercent);
+        marker.dataset.localPercent = String(localPercent);
+        marker.dataset.fromSide = isLeft ? 'left' : 'right';
         mat.append(marker);
       }
-      section.append(mat);
-      const ticks=document.createElement('div');ticks.className='mat-ticks';
-      // Tick labels must track the same physical left/right side as the ball.
-      const reverseAxis = !isLeft;
-      ticks.innerHTML=(reverseAxis?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
-      section.append(ticks);
-      // Only right-aiming layouts spanning multiple mats reverse the visual order.
-      // Logical mat numbers, marker placement and calculation remain unchanged.
-      if (!isLeft && count > 1) {
-        matsWrap.prepend(section);
-      } else {
-        matsWrap.append(section);
-      }
+      segment.append(mat);
+      const ticks = document.createElement('div');
+      ticks.className = 'mat-ticks';
+      ticks.innerHTML = tickValues.map(value => '<span>' + value + '%</span>').join('');
+      segment.append(ticks);
+      if (!isLeft && count > 1) matsWrap.prepend(segment);
+      else matsWrap.append(segment);
     }
   }
   const LIMITS={distance:1000,slopeValue:100,apronValue:1000,cups:1000};
