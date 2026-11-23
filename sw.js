@@ -1,20 +1,27 @@
 'use strict';
-// Version bump changes the static shell cache on the next online visit.
-const CACHE='ji-golf-shell-v2-aim-fix-20261123';
-const CORE=['./','./index.html','./styles.css','./app.js',
-  './intro.js','./field-engine.js','./settings-engine.js',
-  './club-engine.js','./putting-calculator/index.html','./manifest.webmanifest','./icons/app.svg'];
+// V2.0 Build 20261123.01 - no app response caching.
+// Existing application caches are removed, but browser localStorage is NEVER cleared.
+const SCOPE=self.registration.scope;
+async function clearAppCaches(){
+  const keys=await caches.keys();
+  await Promise.all(keys.filter(k=>k.startsWith('ji-golf-shell-')).map(k=>caches.delete(k)));
+}
 self.addEventListener('install',event=>{
- event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));
+  event.waitUntil(self.skipWaiting());
 });
 self.addEventListener('activate',event=>{
- event.waitUntil(Promise.all([
-  caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('ji-golf-shell-')&&key!==CACHE).map(key=>caches.delete(key)))),
-  self.clients.claim()
- ]));
+  event.waitUntil(Promise.all([clearAppCaches(),self.clients.claim()]));
+});
+self.addEventListener('message',event=>{
+  if(event.data?.type==='JI_CLEAR_APP_CACHE'){
+    event.waitUntil(clearAppCaches().then(()=>event.ports?.[0]?.postMessage({ok:true})).catch(()=>event.ports?.[0]?.postMessage({ok:false})));
+  }
 });
 self.addEventListener('fetch',event=>{
- const req=event.request;
- if(req.method!=='GET'||new URL(req.url).origin!==self.location.origin)return;
- event.respondWith(fetch(req).then(response=>{if(response.ok&&req.url.startsWith(self.registration.scope)){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(req,copy)).catch(()=>{});}return response;}).catch(()=>caches.match(req)));
+  const req=event.request;
+  if(req.method!=='GET')return;
+  const url=new URL(req.url);
+  if(!url.href.startsWith(SCOPE)||url.origin!==self.location.origin)return;
+  // Network only, bypass HTTP cache; never reuse stale application resources.
+  event.respondWith(fetch(new Request(req,{cache:'no-store'})));
 });
