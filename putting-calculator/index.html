@@ -577,7 +577,14 @@ html.embedded .container{padding-top:18px}
       const ticks=document.createElement('div');ticks.className='mat-ticks';
       const reverseAxis = count === 1 ? !isLeft : isLeft;
       ticks.innerHTML=(reverseAxis?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
-      section.append(ticks);matsWrap.append(section);
+      section.append(ticks);
+      // Only right-aiming layouts spanning multiple mats reverse the visual order.
+      // Logical mat numbers, marker placement and calculation remain unchanged.
+      if (!isLeft && count > 1) {
+        matsWrap.prepend(section);
+      } else {
+        matsWrap.append(section);
+      }
     }
   }
   const LIMITS={distance:1000,slopeValue:100,apronValue:1000,cups:1000};
