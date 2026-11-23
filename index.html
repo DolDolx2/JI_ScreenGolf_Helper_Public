@@ -12,18 +12,30 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="JI 골프 도우미">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./putting-engine.js" defer></script>
+  <script src="./intro.js" defer></script>
   <script src="./field-engine.js" defer></script>
   <script src="./settings-engine.js" defer></script>
   <script src="./club-engine.js" defer></script>
-  <script src="./putting-mat.js" defer></script>
+  
   <script src="./app.js" defer></script>
   <script src="./pwa.js" defer></script>
 </head>
 <body>
+  <div id="intro" class="intro" aria-label="시작 화면">
+    <div class="intro-inner">
+      <div class="intro-mark" aria-hidden="true">⛳</div>
+      <div class="intro-eyebrow">JI SCREEN GOLF</div>
+      <h2>스크린골프 도우미</h2>
+      <p>퍼팅부터 필드 공략까지, 한 번에.</p>
+      <div class="intro-progress"><div id="intro-progress-bar"></div></div>
+      <p class="intro-countdown" id="intro-countdown">5초 후 자동 입장</p>
+      <button type="button" id="intro-skip">바로 시작하기</button>
+      <small>DESIGNED &amp; DEVELOPED BY KIM JUNGIN</small>
+    </div>
+  </div>
   <div class="app">
     <header class="hero">
-      <div class="hero-top"><span class="eyebrow">JI SCREEN GOLF</span><span class="version">V1 · UI Preview</span></div>
+      <div class="hero-top"><span class="eyebrow">JI SCREEN GOLF</span><span class="version">V2.0</span></div>
       <h1>JI SCREEN 도우미</h1>
       <p>퍼팅부터 필드 공략까지, 내 손안의 계산 도우미</p>
     </header>
@@ -34,56 +46,11 @@
     </nav>
     <main>
       <section class="panel" id="panel-putting" role="tabpanel" aria-labelledby="tab-putting">
-        <div class="section-heading"><h2>퍼팅 계산</h2><span class="pill">STEP 03 · 계산 가능</span></div>
-        <div class="card">
-          <h3>퍼팅 조건</h3>
-          <div class="grid" id="putting-inputs">
-            <label>그린스피드<select id="green-speed"><option value="2.4">보통 · 2.4</option><option value="2.6" selected>약간 빠름 · 2.6</option><option value="2.8">빠름 · 2.8</option><option value="3.1">매우 빠름 · 3.1</option></select></label>
-            <label>남은 거리 (m)<input type="number" min="0" step="0.1" inputmode="decimal" id="putting-distance" placeholder="예: 6.8"></label>
-            <label>높낮이<select id="putting-slope"><option value="up">오르막</option><option value="down">내리막</option><option value="flat">평지</option></select></label>
-            <label>높이 차이 (m)<input type="number" min="0" step="0.01" inputmode="decimal" id="putting-height" placeholder="예: 0.03"></label>
-            <label>브레이크 방향<select id="putting-break-side"><option value="right">오른쪽</option><option value="left">왼쪽</option><option value="none">없음</option></select></label>
-            <label>브레이크 (컵)<input type="number" min="0" step="0.5" inputmode="decimal" id="putting-break-cups" placeholder="예: 2"></label>
-          </div>
-        </div>
-        <div class="card">
-          <h3>계산 결과</h3>
-          <div class="result-grid">
-            <div class="result"><span>보정 퍼팅거리</span><strong id="putting-result-distance">입력 대기</strong></div>
-            <div class="result"><span>필요 볼스피드</span><strong id="putting-result-speed">입력 대기</strong></div>
-            <div class="result"><span>조준 방향</span><strong id="putting-result-aim">입력 대기</strong></div>
-            <div class="result"><span>홀 옆 이동거리</span><strong id="putting-result-lateral">입력 대기</strong></div>
-          </div>
-          <p class="notice"><span id="putting-status" role="status">남은 거리를 입력하면 자동 계산합니다.</span> 참고 자료의 경험식 및 제한된 볼스피드 표를 이용한 추정값으로 실제 샷 결과와 다를 수 있습니다.</p>
-        </div>
-        <div class="card" id="mat-card">
-          <h3>조준 시각 가이드</h3>
-          <p class="muted">매트 35cm · 6칸 (약 5.83cm/칸) · 골프공 직경 4.3cm</p>
-          <div class="mat-visual">
-            <svg id="mat-svg" viewBox="0 -22 350 232" role="img" aria-labelledby="mat-title mat-desc">
-              <title id="mat-title">경계선 기준 퍼팅 조준도</title>
-              <desc id="mat-desc">퍼팅 거리를 입력하면 조준 위치를 표시합니다.</desc>
-              <defs><marker id="aim-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ffcf3f"/></marker></defs>
-              <rect x="0" y="0" width="350" height="194" rx="9" fill="#00ae57"/>
-              <g stroke="white" stroke-width="2" opacity=".85">
-                <line x1="58.3333" y1="0" x2="58.3333" y2="194"/>
-                <line x1="116.6667" y1="0" x2="116.6667" y2="194"/>
-                <line x1="175" y1="0" x2="175" y2="194"/>
-                <line x1="233.3333" y1="0" x2="233.3333" y2="194"/>
-                <line x1="291.6667" y1="0" x2="291.6667" y2="194"/>
-              </g>
-              <line x1="175" y1="0" x2="175" y2="194" stroke="#ffcf3f" stroke-width="3" stroke-dasharray="7 5"/>
-              <line id="mat-aim-line" x1="175" y1="145" x2="175" y2="-12" stroke="#ffcf3f" stroke-width="4" marker-end="url(#aim-arrow)" />
-              <circle id="mat-ball" cx="175" cy="145" r="21.5" fill="#fff" stroke="#d7e5dd" stroke-width="1.5"/>
-              <text x="175" y="207" font-size="11" text-anchor="middle" fill="#365740">노란 세로선 = 조준 목표 경계선</text>
-            </svg>
-          </div>
-          <p id="mat-guide-text" class="mat-guide-text" role="status">퍼팅 거리를 입력하면 공의 시작 위치를 표시합니다.</p>
-          <p class="notice">조준 목표 경계선은 고정하고, 공의 시작 위치를 반대로 이동합니다. 그림은 실물 크기가 아닌 비례 도식입니다.</p>
-        </div>
+        <div class="section-heading"><h2>퍼팅 에이밍 계산</h2><span class="pill">V2.0 · 새 퍼팅 계산</span></div>
+        <iframe id="putting-frame" title="퍼팅 에이밍 계산기" src="./putting-calculator/?embedded=1" loading="eager" scrolling="no"></iframe>
       </section>
       <section class="panel" id="panel-field" role="tabpanel" aria-labelledby="tab-field" hidden>
-        <div class="section-heading"><h2>일반필드 공략</h2><span class="pill">STEP 06 · 클럽 추천</span></div>
+        <div class="section-heading"><h2>일반필드 공략</h2><span class="pill">클럽 추천</span></div>
         <div class="card">
           <h3>샷 조건</h3>
           <div class="grid">
@@ -108,21 +75,19 @@
         </div>
       </section>
       <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
-        <div class="section-heading"><h2>내 클럽 설정</h2><span class="pill">STEP 05 · 저장·검증</span></div>
+        <div class="section-heading"><h2>내 클럽 설정</h2><span class="pill">자동 저장</span></div>
         <div class="card">
           <h3>클럽별 비거리</h3>
           <p class="muted">평지·무풍 기준의 본인 클럽 최소·최대 거리(m)를 입력합니다. 빈칸은 미등록으로 처리합니다.</p>
           <div class="club-head"><span>클럽</span><span>최소 (m)</span><span>최대 (m)</span></div>
-          <div class="club-row" data-club="i4"><span>아이언 4번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 4번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 4번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="i5"><span>아이언 5번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 5번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 5번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="i6"><span>아이언 6번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 6번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 6번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="i7"><span>아이언 7번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 7번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 7번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="i8"><span>아이언 8번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 8번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 8번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="i9"><span>아이언 9번</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 9번 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 9번 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="p"><span>아이언 P</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 P 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 P 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="w48"><span>아이언 48도</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 48도 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 48도 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="w52"><span>아이언 52도</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 52도 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 52도 최대 거리" placeholder="최대"></div>
-          <div class="club-row" data-club="w56"><span>아이언 56도</span><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="min" aria-label="아이언 56도 최소 거리" placeholder="최소"><input type="number" min="0" step="0.1" inputmode="decimal" data-bound="max" aria-label="아이언 56도 최대 거리" placeholder="최대"></div>
+          <div id="club-rows"></div>
+          <div class="add-club">
+            <label for="custom-club-name">사용자 클럽 추가</label>
+            <div class="add-club-controls">
+              <input id="custom-club-name" type="text" maxlength="32" placeholder="예: 유틸리티 4번 / 웨지 60도">
+              <button type="button" id="add-club-btn">추가</button>
+            </div>
+          </div>
           <p class="notice" id="club-status" role="status">이 기기에 저장됩니다.</p>
         </div>
         <div class="card">
@@ -139,7 +104,7 @@
         </div>
       </section>
     </main>
-    <footer>JI SCREEN 도우미 · 비공식 개인용 거리 참고 도구</footer>
+    <footer>JI SCREEN 도우미 V2.0 · 디자인 및 개발 김정인</footer>
   </div>
 </body>
 </html>
