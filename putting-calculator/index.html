@@ -563,19 +563,19 @@ html.embedded .container{padding-top:18px}
         const pos=ratioPercent-start;
         const marker=document.createElement('div');
         marker.className='ball-marker'+(ratioPercent>100?' over':'');
-        // Keep the approved single-mat layout unchanged.
-        // With multiple mats, measure the remainder in the direction of travel:
-        // LEFT aims right-to-left (33.3% => right third);
-        // RIGHT aims left-to-right (33.3% => left third).
+        // Preserve single-mat placement. In a multi-mat view, the active mat
+        // is shown at the far end of the stacked guide and its remainder is
+        // read inward from the RIGHT edge for both directions.
+        // E.g. RIGHT 119.6%: mat 2 at the top, 19.6% in from its right edge.
         const horizontalPercent = count === 1
           ? (isLeft ? pos : 100 - pos)
-          : (isLeft ? 100 - pos : pos);
+          : 100 - pos;
         marker.style.left='clamp(12px, '+horizontalPercent+'%, calc(100% - 12px))';
         mat.append(marker);
       }
       section.append(mat);
       const ticks=document.createElement('div');ticks.className='mat-ticks';
-      const reverseAxis = count === 1 ? !isLeft : isLeft;
+      const reverseAxis = count > 1 || !isLeft;
       ticks.innerHTML=(reverseAxis?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
       section.append(ticks);
       // Only right-aiming layouts spanning multiple mats reverse the visual order.
