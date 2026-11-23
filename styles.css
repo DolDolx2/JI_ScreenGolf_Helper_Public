@@ -48,3 +48,8 @@ body.intro-open{overflow:hidden}
 .add-club-controls input{flex:1}
 #add-club-btn{background:#145a35;border:0;border-radius:10px;padding:0 16px;font-weight:700;color:#fff;min-height:44px}
 @media(max-width:400px){.club-row{gap:5px}.club-row span{font-size:12px}.club-remove{font-size:10px}}
+
+/* V2.0: app version stays fixed; build number changes every release. */
+.hero .version{display:flex;align-items:flex-end;flex-direction:column;gap:3px;white-space:nowrap}
+.hero .build-version{color:#bdeacc;font-size:10px;letter-spacing:.025em}
+.intro-build{color:#9fd9b5;font-size:11px;font-weight:700;margin-top:4px}
