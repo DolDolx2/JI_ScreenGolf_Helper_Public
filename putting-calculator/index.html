@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>스크린골프 퍼팅 계산기</title>
+  <style>
+    :root {
+      --primary: #1b8a4b;
+      --primary-dark: #136837;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --surface: #273549;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --border: #334155;
+      --accent: #4ade80;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      padding: 20px 18px;
+      border: 1px solid var(--border);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .btn-reset {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 42px 12px 14px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+
+    .unit {
+      position: absolute;
+      right: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    .btn-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .cols-5 { grid-template-columns: repeat(5, 1fr); margin-top: 8px; }
+
+    .toggle-btn {
+      padding: 10px 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .toggle-btn.active {
+      background: var(--primary);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .sub-input-box {
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(27, 138, 75, 0.16);
+      border: 1px solid rgba(74, 222, 128, 0.35);
+      border-radius: 12px;
+      display: none;
+    }
+
+    .sub-input-box.show {
+      display: block;
+    }
+
+    .cup-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dir-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dir-btn {
+      padding: 11px 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: #cbd5e1;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .dir-btn.active {
+      background: var(--primary-dark);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .result-card {
+      margin-top: 18px;
+      background: linear-gradient(150deg, #132a1e, #1b3b2b);
+      border: 1px solid #2e5e46;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .result-label {
+      font-size: 0.86rem;
+      color: #a7c4b5;
+    }
+
+    .result-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .formula-note {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+
+    .highlight-box {
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      padding-top: 12px;
+    }
+
+    .highlight-value {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .direction-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #fde68a;
+      line-height: 1.4;
+    }
+
+    .flow-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .flow-arrow {
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .mats-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .turf-mat {
+      position: relative;
+      height: 64px;
+      border-radius: 10px;
+      background: repeating-linear-gradient(
+        90deg,
+        #1e6b3d 0px,
+        #1e6b3d 18px,
+        #247845 18px,
+        #247845 36px
+      );
+      border: 2px solid #4ade80;
+      overflow: hidden;
+      box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .turf-aim-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .turf-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      pointer-events: none;
+    }
+
+    .turf-grid span {
+      border-right: 1px dashed rgba(255, 255, 255, 0.35);
+      height: 100%;
+    }
+
+    .turf-grid span:last-child {
+      border-right: none;
+    }
+
+    .ball-marker {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, #ffffff 0%, #f1f5f9 55%, #cbd5e1 100%);
+      border: 1.5px solid #e2e8f0;
+      box-shadow: 0 5px 8px rgba(0, 0, 0, 0.55);
+      transform: translate(-50%, -50%);
+      transition: left 0.2s ease;
+      z-index: 2;
+    }
+
+    .ball-marker.over {
+      box-shadow: 0 0 0 2px #ef4444, 0 5px 8px rgba(0, 0, 0, 0.55);
+    }
+
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    .warning-text {
+      font-size: 0.8rem;
+      color: #fbbf24;
+      margin-top: 8px;
+      font-weight: 700;
+      display: none;
+    }
+  .preset-grid {grid-template-columns:repeat(5,minmax(0,1fr));} .preset-grid .toggle-btn {min-height:44px;overflow-wrap:anywhere;font-size:.76rem;padding:8px 3px;} .mat-segment {min-width:0;} .mat-label {display:flex;justify-content:space-between;font-size:.77rem;color:#d1fae5;margin:0 0 5px;} .mat-label strong {color:#4ade80;} .mat-ticks {display:flex;justify-content:space-between;color:#94a3b8;font-size:.71rem;margin-top:5px;} .turf-mat {margin-inline:10px;} button:focus-visible,input:focus-visible {outline:2px solid var(--accent);outline-offset:2px;} @media(max-width:390px){body{padding:8px}.container{padding:16px 12px}.preset-grid{grid-template-columns:repeat(3,minmax(0,1fr)}} @media(prefers-reduced-motion:reduce){.ball-marker{transition:none}} </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>⛳ 퍼팅 에이밍 계산기</h1>
+    <button type="button" class="btn-reset" onclick="resetForm()">초기화</button>
+  </header>
+
+  <div class="form-group">
+    <label for="distance">남은 거리</label>
+    <div class="input-wrapper">
+      <input type="number" id="distance" step="0.01" min="0" max="1000" placeholder="예: 5" inputmode="decimal">
+      <span class="unit">m</span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>경사 선택</label>
+    <div class="btn-group cols-3" id="slopeGroup">
+      <button type="button" class="toggle-btn active" data-val="flat" onclick="selectSlope('flat')">평지</button>
+      <button type="button" class="toggle-btn" data-val="up" onclick="selectSlope('up')">오르막 (+)</button>
+      <button type="button" class="toggle-btn" data-val="down" onclick="selectSlope('down')">내리막 (-)</button>
+    </div>
+    <div class="sub-input-box" id="slopeInputBox">
+      <label for="slopeValue" id="slopeInputLabel">오르막 수치 (×10 ×1.5)</label>
+      <div class="input-wrapper">
+        <input type="number" id="slopeValue" step="0.01" min="0" max="100" placeholder="예: 0.15" inputmode="decimal">
+        <span class="unit">m</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>위치 선택</label>
+    <div class="btn-group cols-2" id="surfaceGroup">
+      <button type="button" class="toggle-btn active" data-val="green" onclick="selectSurface('green')">그린 (기본)</button>
+      <button type="button" class="toggle-btn" data-val="apron" onclick="selectSurface('apron')">에이프런</button>
+    </div>
+    <div class="sub-input-box" id="apronInputBox">
+      <label for="apronValue">에이프런 추가 거리</label>
+      <div class="input-wrapper">
+        <input type="number" id="apronValue" step="0.1" min="0" max="1000" placeholder="예: 1.5" inputmode="decimal">
+        <span class="unit">m</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="cups">캐디 컵수 및 좌/우 방향</label>
+    <div class="cup-row">
+      <div class="input-wrapper">
+        <input type="number" id="cups" step="0.5" min="0" max="1000" placeholder="예: 10" inputmode="decimal">
+        <span class="unit">컵</span>
+      </div>
+      <div class="dir-group" id="dirGroup">
+        <button type="button" class="dir-btn active" data-dir="left" onclick="selectDir('left')">← 좌</button>
+        <button type="button" class="dir-btn" data-dir="right" onclick="selectDir('right')">우 →</button>
+      </div>
+    </div>
+    <div class="btn-group cols-5 preset-grid">
+      <button type="button" class="toggle-btn" onclick="setPresetCup(6)">한클럽(6)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(9)">1.5클럽(9)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(11)">1클럽이상(11)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(12)">두클럽(12)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(13)">2클럽이상(13)</button>
+    </div>
+    <div class="btn-group cols-5 preset-grid">
+      <button type="button" class="toggle-btn" onclick="setPresetCup(14)">2클럽더(14)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(16)">2.5클럽이상(16)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(17)">2클럽더는(17)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(19)">3클럽이상(19)</button>
+      <button type="button" class="toggle-btn" onclick="setPresetCup(20)">3클럽더(20)</button>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-row">
+      <span class="result-label">총 공략 거리</span>
+      <span class="result-value" id="totalDistanceDisplay">0.00 m</span>
+    </div>
+
+    <div class="formula-note" id="formulaDisplay">거리식: 남은 거리를 입력하세요.</div>
+
+    <div class="highlight-box">
+      <div class="result-row" style="margin-bottom: 2px;">
+        <span class="result-label">매트 1칸(100%) 기준 위치</span>
+        <span class="highlight-value" id="matPercentDisplay">- %</span>
+      </div>
+      <div class="direction-badge" id="aimSummary">에이밍 방향: 좌(←) 기준 대기 중</div>
+    </div>
+
+    <div class="flow-header" id="flowHeader">
+      <span>매트 끝 (100%)</span>
+      <span class="flow-arrow">◀◀◀ 진행 방향 (우 → 좌)</span>
+      <span>공 출발 (0%)</span>
+    </div>
+
+    <div class="mats-wrap" id="matsWrap"></div>
+
+    <div class="warning-text" id="overWarning" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+  let currentSlope = 'flat';
+  let currentSurface = 'green';
+  let currentDir = 'left';
+
+  const distanceEl = document.getElementById('distance');
+  const slopeValueEl = document.getElementById('slopeValue');
+  const apronValueEl = document.getElementById('apronValue');
+  const cupsEl = document.getElementById('cups');
+
+  [distanceEl, slopeValueEl, apronValueEl, cupsEl].forEach(el => {
+    el.addEventListener('input', calculate);
+  });
+
+  function selectSlope(type) {
+    currentSlope = type;
+    document.querySelectorAll('#slopeGroup .toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.val === type);
+    });
+    const box = document.getElementById('slopeInputBox');
+    const label = document.getElementById('slopeInputLabel');
+    if (type === 'flat') {
+      box.classList.remove('show');
+    } else {
+      box.classList.add('show');
+      label.textContent = type === 'up' ? '오르막 수치 (×10 ×1.5)' : '내리막 수치 (×10 차감)';
+      slopeValueEl.focus();
+    }
+    calculate();
+  }
+
+  function selectSurface(type) {
+    currentSurface = type;
+    document.querySelectorAll('#surfaceGroup .toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.val === type);
+    });
+    const box = document.getElementById('apronInputBox');
+    if (type === 'green') {
+      box.classList.remove('show');
+    } else {
+      box.classList.add('show');
+      apronValueEl.focus();
+    }
+    calculate();
+  }
+
+  function selectDir(dir) {
+    currentDir = dir;
+    document.querySelectorAll('#dirGroup .dir-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.dir === dir);
+    });
+    calculate();
+  }
+
+  function setPresetCup(val) {
+    cupsEl.value = val;
+    calculate();
+  }
+
+  function getAdjustedCups(rawDist, rawCups, slopeType) {
+    if (rawCups <= 0) return { adjCups: 0, note: '' };
+
+    if (rawDist > 0 && rawDist <= 3) {
+      return {
+        adjCups: rawCups * 0.5,
+        note: `남은거리 ${rawDist}m(0~3m) → 50% 적용: ${rawCups}컵 → ${(rawCups * 0.5).toFixed(1)}컵`
+      };
+    }
+
+    if (rawDist > 3 && rawDist <= 5) {
+      if (slopeType === 'up') {
+        return {
+          adjCups: rawCups * 0.8,
+          note: `남은거리 ${rawDist}m(3~5m) 오르막 → 80% 적용: ${rawCups}컵 → ${(rawCups * 0.8).toFixed(1)}컵`
+        };
+      }
+      if (slopeType === 'down') {
+        return {
+          adjCups: rawCups * 0.7,
+          note: `남은거리 ${rawDist}m(3~5m) 내리막 → 70% 적용: ${rawCups}컵 → ${(rawCups * 0.7).toFixed(1)}컵`
+        };
+      }
+      return {
+        adjCups: rawCups,
+        note: `남은거리 ${rawDist}m(3~5m) 평지 → ${rawCups}컵 그대로 적용`
+      };
+    }
+
+    return {
+      adjCups: rawCups,
+      note: rawDist > 5 ? `남은거리 ${rawDist}m(5m 초과) → ${rawCups}컵 그대로 적용` : ''
+    };
+  }
+
+  function renderVisualAxis(ratioPercent, dir) {
+    const flowHeader = document.getElementById('flowHeader');
+    const matsWrap = document.getElementById('matsWrap');
+    const isLeft = dir === 'left';
+    flowHeader.innerHTML = isLeft
+      ? '<span>매트 끝</span><span class="flow-arrow">◀◀◀ 진행 방향 (우 → 좌)</span><span>공 출발</span>'
+      : '<span>공 출발</span><span class="flow-arrow">진행 방향 (좌 → 우) ▶▶▶</span><span>매트 끝</span>';
+    matsWrap.replaceChildren();
+    const count = Math.max(1, Math.ceil(ratioPercent / 100));
+    for(let i=0;i<count;i++){
+      const start=i*100,end=(i+1)*100;
+      const section=document.createElement('div');
+      section.className='mat-segment';
+      const label=document.createElement('div');
+      label.className='mat-label';
+      label.innerHTML='<strong>'+(i+1)+'번째 매트</strong><span>'+start+'% ~ '+end+'%</span>';
+      section.append(label);
+      const mat=document.createElement('div');
+      mat.className='turf-mat';
+      mat.innerHTML='<div class="turf-aim-line"></div><div class="turf-grid"><span></span><span></span><span></span><span></span></div>';
+      if(ratioPercent>0&&ratioPercent>start&&ratioPercent<=end){
+        const pos=ratioPercent-start;
+        const marker=document.createElement('div');
+        marker.className='ball-marker'+(ratioPercent>100?' over':'');
+        marker.style.left='clamp(12px, '+(isLeft?100-pos:pos)+'%, calc(100% - 12px))';
+        mat.append(marker);
+      }
+      section.append(mat);
+      const ticks=document.createElement('div');ticks.className='mat-ticks';
+      ticks.innerHTML=(isLeft?[end,start+75,start+50,start+25,start]:[start,start+25,start+50,start+75,end]).map(v=>'<span>'+v+'%</span>').join('');
+      section.append(ticks);matsWrap.append(section);
+    }
+  }
+  const LIMITS={distance:1000,slopeValue:100,apronValue:1000,cups:1000};
+  function readNumber(el){const value=el.value.trim();if(!value)return {value:0,valid:true};const n=Number(value);return {value:n,valid:Number.isFinite(n)&&n>=0&&n<=LIMITS[el.id]};}
+  function calculate() {
+    const distanceInput=readNumber(distanceEl), slopeInput=readNumber(slopeValueEl), apronInput=readNumber(apronValueEl), cupsInput=readNumber(cupsEl);
+    if(!distanceInput.valid||!cupsInput.valid||(currentSlope!=='flat'&&!slopeInput.valid)||(currentSurface==='apron'&&!apronInput.valid)){
+      document.getElementById('totalDistanceDisplay').textContent='- m';
+      document.getElementById('formulaDisplay').textContent='거리식: 입력값을 확인하세요.';
+      document.getElementById('matPercentDisplay').textContent='- %';
+      document.getElementById('aimSummary').textContent='입력값 오류';
+      renderVisualAxis(0,currentDir);
+      const msg=document.getElementById('overWarning');msg.style.display='block';msg.textContent='입력 범위를 확인하세요. 거리·에이프런·컵수는 0~1000, 경사값은 0~100입니다.';
+      return;
+    }
+    const dist=distanceInput.value,slopeVal=slopeInput.value,apronVal=apronInput.value,rawCups=cupsInput.value;
+
+    let totalDist = dist;
+    const parts = [`${dist}`];
+
+    if (currentSlope === 'up') {
+      totalDist += slopeVal * 10 * 1.5;
+      parts.push(`+ (${slopeVal} × 10 × 1.5)`);
+    } else if (currentSlope === 'down') {
+      totalDist -= slopeVal * 10;
+      parts.push(`- (${slopeVal} × 10)`);
+    }
+
+    if (currentSurface === 'apron') {
+      totalDist += apronVal;
+      parts.push(`+ ${apronVal}(에이프런)`);
+    }
+
+    if (totalDist < 0) totalDist = 0;
+
+    document.getElementById('totalDistanceDisplay').textContent = `${totalDist.toFixed(2)} m`;
+    document.getElementById('formulaDisplay').textContent =
+      dist > 0 ? `거리식: ${parts.join(' ')} = ${totalDist.toFixed(2)}m` : '거리식: 남은 거리를 입력하세요.';
+
+    const { adjCups, note } = getAdjustedCups(dist, rawCups, currentSlope);
+    const dirText = currentDir === 'left' ? '좌(←)' : '우(→)';
+    const matPercentDisplay = document.getElementById('matPercentDisplay');
+    const aimSummary = document.getElementById('aimSummary');
+    const overWarning = document.getElementById('overWarning');
+
+    if (totalDist > 0 && adjCups > 0) {
+      const ratioPercent = (adjCups / totalDist) * 100;
+      const displayNum = Number.isInteger(ratioPercent) ? ratioPercent : ratioPercent.toFixed(1);
+      matPercentDisplay.textContent = `${displayNum} %`;
+      aimSummary.innerHTML = `적용 컵수: ${adjCups.toFixed(1)}컵 ${dirText} → 매트 ${displayNum}% 지점${note ? `<br><span style="color:#cbd5e1;font-weight:500;">${note}</span>` : ''}`;
+
+      renderVisualAxis(ratioPercent, currentDir);
+
+      if (ratioPercent > 100) {
+        overWarning.style.display = 'block';
+        overWarning.textContent = `매트 1칸 초과! ${Math.ceil(ratioPercent/100)}번째 매트 ${(ratioPercent - (Math.ceil(ratioPercent/100)-1)*100).toFixed(1)}% 위치 (${dirText})`;
+      } else {
+        overWarning.style.display = 'none';
+      }
+    } else {
+      matPercentDisplay.textContent = '- %';
+      aimSummary.textContent = `에이밍 방향: ${dirText} 기준 대기 중`;
+      renderVisualAxis(0, currentDir);
+      overWarning.style.display = dist > 0 && totalDist === 0 ? 'block' : 'none';
+      if(dist > 0 && totalDist === 0) overWarning.textContent='공략 거리가 0m입니다. 경사값을 확인하세요.';
+    }
+  }
+
+  function resetForm() {
+    distanceEl.value = '';
+    slopeValueEl.value = '';
+    apronValueEl.value = '';
+    cupsEl.value = '';
+    selectSlope('flat');
+    selectSurface('green');
+    selectDir('left');
+    calculate();
+  }
+
+  calculate();
+</script>
+</body>
+</html>
