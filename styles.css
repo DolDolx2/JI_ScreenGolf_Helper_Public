@@ -23,3 +23,28 @@ input:invalid{border-color:#b64b42}
 @media(max-width:350px){.penalty-settings{gap:8px}}
 
 .mat-visual{max-width:540px;margin:10px auto}.mat-visual svg{display:block;width:100%;height:auto;overflow:visible}.mat-guide-text{font-weight:700;color:#155839;font-size:14px;line-height:1.6;text-align:center;background:#eaf5ed;padding:10px;border-radius:10px}
+
+/* V2 integrated app */
+body.intro-open{overflow:hidden}
+.intro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#174a34,#071b14 74%);color:#fff;padding:24px;text-align:center}
+.intro[hidden]{display:none!important}
+.intro-inner{width:min(100%,420px);display:flex;flex-direction:column;align-items:center}
+.intro-mark{height:98px;width:98px;display:grid;place-items:center;background:#165037;border:2px solid #4ade80;border-radius:50%;font-size:50px;margin-bottom:25px}
+.intro-eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;color:#89e3af}
+.intro h2{font-size:27px;letter-spacing:-.04em;margin:13px 0 8px}
+.intro p{color:#b8d4c4;font-size:14px;margin:0}
+.intro-progress{background:#2c5441;width:100%;height:6px;overflow:hidden;border-radius:99px;margin-top:55px}
+#intro-progress-bar{width:0;height:100%;background:#4ade80}
+.intro .intro-countdown{align-self:flex-start;font-size:12px;margin-top:9px}
+#intro-skip{border:0;background:#e5faee;color:#14532d;border-radius:13px;padding:15px 30px;min-height:48px;margin:29px 0;font-size:15px;font-weight:800}
+.intro small{color:#8eb7a1;font-size:10px;letter-spacing:.08em}
+#putting-frame{width:100%;height:900px;display:block;border:0;border-radius:18px;background:#0f172a}
+.club-row{grid-template-columns:minmax(90px,1.25fr) repeat(2,minmax(0,1fr));}
+.club-row:has(.club-remove){grid-template-columns:minmax(85px,1.25fr) repeat(2,minmax(0,1fr)) 42px}
+.club-name{overflow-wrap:anywhere}
+.club-remove{padding:7px 2px;border-radius:8px;border:1px solid #e5b8b0;color:#b4483d;background:#fff;font-size:11px;min-height:42px}
+.add-club{padding:15px;margin-top:16px;border-radius:14px;background:#f1f7f3}
+.add-club-controls{display:flex;gap:8px;margin-top:8px}
+.add-club-controls input{flex:1}
+#add-club-btn{background:#145a35;border:0;border-radius:10px;padding:0 16px;font-weight:700;color:#fff;min-height:44px}
+@media(max-width:400px){.club-row{gap:5px}.club-row span{font-size:12px}.club-remove{font-size:10px}}
