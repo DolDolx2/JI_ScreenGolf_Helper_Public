@@ -1,12 +1,14 @@
-// Recommendation based on final adjusted distance only; do not reapply lie/wind/elevation.
+// Dynamic club recommendations: registered custom clubs participate in ranking.
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.JIClub=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const NAMES=Object.freeze({i4:'아이언 4번',i5:'아이언 5번',i6:'아이언 6번',i7:'아이언 7번',i8:'아이언 8번',i9:'아이언 9번',p:'아이언 P',w48:'48도',w52:'52도',w56:'56도'});
-function recommend(distance,clubs){
+const NAMES=Object.freeze({i3:'아이언 3번',i4:'아이언 4번',i5:'아이언 5번',i6:'아이언 6번',i7:'아이언 7번',i8:'아이언 8번',i9:'아이언 9번',p:'아이언 P',w48:'48도 웨지',w52:'52도 웨지',w56:'56도 웨지',w58:'58도 웨지'});
+function recommend(distance,clubs,customClubs=[]){
  if(!Number.isFinite(distance)||distance<0)throw new RangeError('유효한 공략거리가 필요합니다.');
- const available=Object.keys(NAMES).filter(k=>{
+ const labels={...NAMES};
+ for(const club of customClubs)if(club&&typeof club.id==='string'&&typeof club.name==='string'&&club.name.trim()&&club.id.startsWith('custom-'))labels[club.id]=club.name.trim();
+ const available=Object.keys(labels).filter(k=>{
    const c=clubs?.[k];return c&&Number.isFinite(c.min)&&Number.isFinite(c.max)&&c.min>=0&&c.max>=c.min;
- }).map(k=>({key:k,name:NAMES[k],min:clubs[k].min,max:clubs[k].max}));
+ }).map(k=>({key:k,name:labels[k],min:clubs[k].min,max:clubs[k].max}));
  if(!available.length)return {type:'unregistered',clubs:[],gap:null};
  const matches=available.filter(c=>c.min<=distance&&distance<=c.max);
  if(matches.length)return {type:matches.length===1?'single':'multiple',clubs:matches,gap:0};
